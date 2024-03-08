@@ -30,7 +30,6 @@ class TelegramBot:
 
 #criar resposta
 
-
   def responder(self, resposta, chat_id):
     #enviar
     link_de_envio = f'{self.url_base}sendMessage?chat_id={chat_id}&text={resposta}'
@@ -119,38 +118,53 @@ class Manager():
         self.__usuarios.append(user)
 
 # Cadastrar Usuarios
-    def register_employee(self):
+    def register_employee(self, chat_id, update_id):
         while True:
-            name = input('\nDigite o nome do funcionario: ')
+            resposta = 'Digite o nome do funcionario:'
+            self.enviar_mensagem(resposta, chat_id)
+            name, chat_id, update_id = self.receber_mensagem(update_id)
             if not self.character_validation(name):
                 if self.user_validation(name):
                     break
                 else:
-                    print('\nEste nome de usuário não está disponível!')
+                    resposta = 'Este nome de usuário não está disponível!'
+                    self.enviar_mensagem(resposta, chat_id)
 
             else:
-                print('\nDigite um nome válido, SEM caracteres especiais!')
+                resposta = 'Digite um nome válido, SEM caracteres especiais!'
+                self.enviar_mensagem(resposta, chat_id)
 
         while True:
-            password = input('\nDigite uma senha. Ela deve possuir ao menos 6 caracteres, uma letra maiúscula e um caractere especial: ') 
+            resposta = 'Digite uma senha. Ela deve possuir ao menos 6 caracteres, uma letra maiúscula e um caractere especial: '
+            self.enviar_mensagem(resposta, chat_id)
+            password, chat_id, update_id = self.receber_mensagem(update_id)
             if len(password) < 6:
-                print('\nA senha deve ter ao menos 6 caracteres!')
+                resposta = 'A senha deve ter ao menos 6 caracteres!'
+                self.enviar_mensagem(resposta, chat_id)
             else:
                 if self.character_validation(password):
-                    if self.isupper_validation(password):
+                    if self.isupper_validation(password, chat_id):
                         break
                 else:
-                    print('\nDigite ao menos um carcatere especial!')
+                    resposta = 'Digite ao menos um carcatere especial!'
+                    self.enviar_mensagem(resposta, chat_id)
 
         while True:
-            passwordConfirm = input('\nDigite a senha novamente: ') 
+            resposta = 'Digite a senha novamente:'
+            self.enviar_mensagem(resposta, chat_id)
+            passwordConfirm, chat_id, update_id = self.receber_mensagem(update_id)
             if password == passwordConfirm:
                 break
             else:
-                print('\nAs senhas são diferentes!')
+                resposta = 'As senhas são diferentes!'
+                self.enviar_mensagem(resposta, chat_id)
 
         while True:
-            choice = input('\nQual o cargo operacional do funcionário? \n1.Administrador \n2.Funcionário \n: ')
+            resposta = '''Qual o cargo operacional do funcionário? 
+1.Administrador 
+2.Funcionário'''
+            self.enviar_mensagem(resposta, chat_id)
+            choice, chat_id, update_id = self.receber_mensagem(update_id)
             if choice == '1':
                 office = 'administrator'
                 break
@@ -160,11 +174,13 @@ class Manager():
                 break
             
             else: 
-                print('\nDigite uma opção válida!')
+                resposta = 'Digite uma opção válida!'
+                self.enviar_mensagem(resposta, chat_id)
         logado = False
         employee = User(name, password, office, logado)
         self.__usuarios.append(employee)
-        print('\nUsuário cadastrado com sucesso!')
+        resposta = 'Usuário cadastrado com sucesso!'
+        self.enviar_mensagem(resposta, chat_id)
 
     def character_validation(self, string):
         regex = re.compile(r'[^\w\s]')
@@ -173,12 +189,13 @@ class Manager():
         else:
             return True
     
-    def isupper_validation(self, string):
+    def isupper_validation(self, string, chat_id):
         for char in string:
             if char.isupper():
                 return True
             else:
-                print('\nDigite ao menos uma letra maiúsula!')
+                resposta = 'Digite ao menos uma letra maiúsula!'
+                self.enviar_mensagem(resposta, chat_id)
                 return False
 
     def user_validation(self, name):
@@ -252,9 +269,6 @@ Digite seu nome de usuário:
         return False
 
     def exibir_menu_adm(self, chat_id, update_id):
-        resposta = 'Digite sua senha: '
-        self.enviar_mensagem(resposta, chat_id)
-        password, chat_id, update_id = self.receber_mensagem(update_id)
 
         resposta = 'Menu de Adminstrador!'
         self.enviar_mensagem(resposta, chat_id)
@@ -265,19 +279,29 @@ Digite seu nome de usuário:
 2.Tarefas 
 3.Sair'''
             self.enviar_mensagem(resposta, chat_id)
-            choice = input('\nO que você deseja fazer? \n1.Funcionários \n2.Tarefas \n3.Sair \n: ')
+            choice, chat_id, update_id = self.receber_mensagem(update_id)
             if choice == '1':
-                choice, chat_id, update_id = self.receber_mensagem(update_id)
                 if choice == '1': self.register_employee(chat_id, update_id)
                 elif choice == '2': pass
                 elif choice == '3': pass
                 elif choice =='4': pass
-                else: print('\nDigite uma opção válida!')
-
+                else: 
+                    resposta = 'Digite uma opção válida!'
+                    self.enviar_mensagem(resposta, chat_id)
 
             elif choice == '2':
-                choice = input('\nO que você deseja fazer? \n1. Adicionar Tarefas \n2.Editar Tarefas \n3.Visualizar Tarefas \n4.Excluir Tarefas \n5.Tornar Tarefas Prioridade \n6.Retirar Prioridade das tarefas \n7.Sair')
-                break
+                resposta = ''''O que você deseja fazer? 
+1. Adicionar Tarefas 
+2.Editar Tarefas 
+3.Visualizar Tarefas 
+4.Excluir Tarefas 
+5.Tornar Tarefas Prioridade 
+6.Retirar Prioridade das tarefas 
+7.Sair'''
+                self.enviar_mensagem(resposta, chat_id)
+                choice, chat_id, update_id = self.receber_mensagem(update_id)
+                #continuar aqui
+                return False
 
             elif choice == '3':
                 return False
@@ -286,9 +310,15 @@ Digite seu nome de usuário:
                 self.enviar_mensagem(resposta, chat_id)
 
     def exibir_menu_employee(self):
-        print('\nMenu de Funcionário!\n\n')
+        resposta = 'Menu de Funcionário!'
+        self.enviar_mensagem(resposta, chat_id)
         while True:
-            choice = input('\nO que você deseja fazer? \n1.Visualizar tarefas pendentes \n2.Marcar tarefas como concluídas \n3.Sair \n: ')
+            resposta = '''O que você deseja fazer? 
+1.Visualizar tarefas pendentes 
+2.Marcar tarefas como concluídas 
+3.Sair'''
+            self.enviar_mensagem(resposta, chat_id)
+            choice, chat_id, update_id = self.receber_mensagem(update_id)
             if choice == '1':
                 pass
 
@@ -298,7 +328,8 @@ Digite seu nome de usuário:
             elif choice == '3':
                 return False
             else:
-                print('\nDigite uma opção válida!')    
+                resposta = 'Digite uma opção válida!'
+                self.enviar_mensagem(resposta, chat_id)
 
 # Looping de execucao
     def looping_execucao(self):
