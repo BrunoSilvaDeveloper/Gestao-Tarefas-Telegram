@@ -270,37 +270,54 @@ class Manager():
 # Funcoes tarefas -------------------------------------------------------------
     
 
-
-    def informacoes_tarefa(self):
+    def informacoes_tarefa(self, chat_id, update_id):
         while True:
-            titulo = input(f'\nDigite o titulo da tarefa: ')
+            resposta = 'Digite o titulo da tarefa:'
+            self.enviar_mensagem(resposta, chat_id)
+            titulo, chat_id, update_id = self.receber_mensagem(update_id)
             if titulo.strip():
                 break
             else:
-                print('\nDigite um titulo!')
-        descricao = input(f'\nDigite a descrição da tarefa: ')
+                resposta = 'Digite um titulo!'
+                self.enviar_mensagem(resposta, chat_id)
+
+        resposta = 'Digite a descrição da tarefa:'
+        self.enviar_mensagem(resposta, chat_id)
+        descricao, chat_id, update_id = self.receber_mensagem(update_id)
+
         data = datetime.now().strftime("%Y-%m-%d")
+
         status = 'Pendente'
+
         while True:
-            funcionario = input(f'\nDigite o nome do funcionario: ')
+            resposta = 'Digite o nome do funcionario:'
+            self.enviar_mensagem(resposta, chat_id)
+            funcionario, chat_id, update_id = self.receber_mensagem(update_id)
             if not self.user_validation(funcionario):
                 break
             else:
-                print('\nFuncionario nao encontrado!')
+                resposta = 'Funcionario nao encontrado!'
+                self.enviar_mensagem(resposta, chat_id)
 
         while True:
-            escolha = input(f'\nEscolha a prioridade ta tarefa: \n1.Alta \n2.Média \n3.Baixa ')
-            if escolha == '1':
+            resposta = '''Escolha a prioridade ta tarefa:
+/Alta
+/Media
+/Baixa'''
+            self.enviar_mensagem(resposta, chat_id)
+            escolha, chat_id, update_id = self.receber_mensagem(update_id)
+            if escolha == '/Alta':
                 prioridade = 'Alta'
                 break
-            elif escolha == '2':
+            elif escolha == '/Media':
                 prioridade = 'Media'  
                 break              
-            elif escolha == '3':
+            elif escolha == '/Baixa':
                 prioridade = 'Baixa'
                 break
             else:
-                print('\nEscolha uma opção válida!')
+                resposta = 'Escolha uma opção válida!'
+                self.enviar_mensagem(resposta, chat_id)
 
         return titulo, descricao, data, status, funcionario, prioridade
 
@@ -329,62 +346,76 @@ class Manager():
                 return True
 
     #mudando o titulo da lista de acordo com o status
-    def titulo_lista_status(self,tipoStatus):
+    def titulo_lista_status(self,tipoStatus, chat_id):
         #verificando qual titulo colocar para a lista com base na escolha do usuario
-        if tipoStatus == 1 and self.verificarTarefasCompletadas():
-            print('\nLista de Tarefas Completadas')
-        elif tipoStatus == 2 and self.verificarTarefasPendentes():
-            print('\n Lista de Tarefas Pendentes')
-        elif tipoStatus == 3 and self.verificarTarefasPendentesAtraso():
-            print('\n Lista de Tarefas Pendentes com Atraso')
-        elif tipoStatus == 4 and self.verificarTarefasCanceladas():
-            print('\n Lista de Tarefas Canceladas')
+        if tipoStatus == '/Completada' and self.verificarTarefasCompletadas():
+            resposta = 'Lista de Tarefas Completadas'
+            self.enviar_mensagem(resposta, chat_id)
+
+        elif tipoStatus == '/Pendente' and self.verificarTarefasPendentes():
+            resposta = 'Lista de Tarefas Pendentes'
+            self.enviar_mensagem(resposta, chat_id)
+
+        elif tipoStatus == '/Atrasada' and self.verificarTarefasPendentesAtraso():
+            resposta = 'Lista de Tarefas Atrasadas'
+            self.enviar_mensagem(resposta, chat_id)
+
+        elif tipoStatus == '/Cancelada' and self.verificarTarefasCanceladas():
+            resposta = 'Lista de Tarefas Canceladas'
+            self.enviar_mensagem(resposta, chat_id)
+
         
     #verificando se existem valores na lista
-    def verificarListaCheia(self):
+    def verificarListaCheia(self, chat_id):
         if len(self.__listaTarefas):
             return True
         else: 
-            print('\nNão existem tarefas na lista, Adicione novas tarefas para poder visualizar!')
+            resposta = 'Não existem tarefas na lista, Adicione novas tarefas para poder visualizar!'
+            self.enviar_mensagem(resposta, chat_id)
         
     #adicionar tarefas a lista
-    def adicionar_tarefa(self):
-        titulo, descricao, data, status, funcionario, prioridade = self.informacoes_tarefa()
+    def adicionar_tarefa(self, chat_id, update_id):
+        titulo, descricao, data, status, funcionario, prioridade = self.informacoes_tarefa(chat_id, update_id)
         tarefa = Tarefa(titulo,descricao,data,status, funcionario, prioridade)
         self.__listaTarefas.append(tarefa)
-        print('\n------------------------------------------------------------------')
-        print('\nTarefa Adicionada com Sucesso!')
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+        resposta = 'Tarefa Adicionada com Sucesso!'
+        self.enviar_mensagem(resposta, chat_id)
 
     #exibir as tarefas da lista
-    def exibir_tarefa(self):
+    def exibir_tarefa(self, chat_id, update_id):
         #verificando se existem tarefas na lista
-        if self.verificarListaCheia():
-            print('\nLista de Tarefas')
+        if self.verificarListaCheia(chat_id):
+            resposta = 'Lista de Tarefas'
+            self.enviar_mensagem(resposta, chat_id)
+
             for index, tarefa in enumerate(self.__listaTarefas):
-                print(f'\nTarefa N{index+1}. {tarefa.get_titulo()}')
-                print(f'Descrição: {tarefa.get_descricao()}')
-                print(f'Criada em: {tarefa.get_data_criacao()}')
-                print(f'Status: {tarefa.get_status()}')
-                print(f'Atribuída ao funcionário: {tarefa.get_funcionario()}')
-                print(f'Prioridade: {tarefa.get_prioridade()}')
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+
+                resposta = f'''Tarefa /{index+1}. {tarefa.get_titulo()}
+Descrição: {tarefa.get_descricao()}
+Criada em: {tarefa.get_data_criacao()}
+Status: {tarefa.get_status()}
+Atribuída ao funcionário: {tarefa.get_funcionario()}
+Prioridade: {tarefa.get_prioridade()} '''
+                self.enviar_mensagem(resposta, chat_id)
 
     #filtrando a lista de tarefas pelo status 
-    def tarefas_status(self):
+    def tarefas_status(self, chat_id, update_id):
         #verificando se existe algum valor na lista
-        if self.verificarListaCheia():
+        if self.verificarListaCheia(chat_id):
             while True:
                 try:
                     #perguntando qual o filtro o usuario deseja utilizar
-                    tipoStatus = int(input('\n1. Completada \n2. Pendente \n3. Pendente com atraso \n4. Cancelada \n: '))
-                    print('\n------------------------------------------------------------------')
+                    resposta = '''/Completada
+/Pendente
+/Atrasada
+/Cancelada'''
+                    self.enviar_mensagem(resposta, chat_id)
+                    tipoStatus, chat_id, update_id = self.receber_mensagem(update_id)
                     break
                 except:
-                    print('\nOpção invalida! Digitte novamente.')
-            self.titulo_lista_status(tipoStatus)            
+                    resposta = 'Opção invalida! Digitte novamente.'
+                    self.enviar_mensagem(resposta, chat_id)
+            self.titulo_lista_status(tipoStatus, chat_id)            
             #exibindo a lista
             for index, tarefaStatus in enumerate(self.__listaTarefas):
                 titulo = tarefaStatus.get_titulo()
@@ -399,296 +430,415 @@ class Manager():
                     if self.verificarTarefasCompletadas(): 
                         #exibindo as tarefas que estao completadas
                         if status == 'Completada':
-                            print(f'\nTarefa N{index+1}. {titulo}')
-                            print(f'Descrição: {descricao}')
-                            print(f'Criada em: {data}')
-                            print(f'Status: {status}')
-                            print(f'Funcionario: {funcionario}')
-                            print(f'Prioridade: {prioridade}')
+                            resposta = f'''Tarefa N{index+1}. {titulo}
+Descrição: {descricao}
+Criada em: {data}
+Status: {status}
+Atribuída ao funcionário: {funcionario}
+Prioridade: {prioridade} '''
+                            self.enviar_mensagem(resposta, chat_id)
                     else: 
-                        print('\nNão existem tarefas Completadas!')
+                        resposta = 'Não existem tarefas Completadas!'
+                        self.enviar_mensagem(resposta, chat_id)
 
                 elif tipoStatus == 2:
                     # verificando se existem tarefas pendentes na lista
                     if self.verificarTarefasPendentes():
                         #exibindo as tarefas que estao pendentes
                         if status == 'Pendente':
-                            print(f'\nTarefa N{index+1}. {titulo}')
-                            print(f'Descrição: {descricao}')
-                            print(f'Criada em: {data}')
-                            print(f'Status: {status}')
-                            print(f'Funcionario: {funcionario}')
-                            print(f'Prioridade: {prioridade}')
+                            resposta = f'''Tarefa N{index+1}. {titulo}
+Descrição: {descricao}
+Criada em: {data}
+Status: {status}
+Atribuída ao funcionário: {funcionario}
+Prioridade: {prioridade} '''
+                            self.enviar_mensagem(resposta, chat_id)
                     else: 
-                        print('\nNão existem tarefas Pendentes!')
+                        resposta = 'Não existem tarefas Pendentes!'
+                        self.enviar_mensagem(resposta, chat_id)
 
                 elif tipoStatus == 3:
                     # verificando se existem tarefas pendentes na lista
                     if self.verificarTarefasPendentesAtraso():
                         #exibindo as tarefas que estao pendentes com atraso
                         if status == 'Pendente com atraso':
-                            print(f'\nTarefa N{index+1}. {titulo}')
-                            print(f'Descrição: {descricao}')
-                            print(f'Criada em: {data}')
-                            print(f'Status: {status}')
-                            print(f'Funcionario: {funcionario}')
-                            print(f'Prioridade: {prioridade}')
+                            resposta = f'''Tarefa N{index+1}. {titulo}
+Descrição: {descricao}
+Criada em: {data}
+Status: {status}
+Atribuída ao funcionário: {funcionario}
+Prioridade: {prioridade} '''
+                            self.enviar_mensagem(resposta, chat_id)
                     else: 
-                        print('\nNão existem tarefas Pendentes com Atraso!')
+                        resposta = 'Não existem tarefas Atrasadas!'
+                        self.enviar_mensagem(resposta, chat_id)
 
                 elif tipoStatus == 4:
                     # verificando se existem tarefas canceladas na lista
                     if self.verificarTarefasCanceladas():
                         #exibindo as tarefas que estao canceladas
                         if status == 'Cancelada':
-                            print(f'\nTarefa N{index+1}. {titulo}')
-                            print(f'Descrição: {descricao}')
-                            print(f'Criada em: {data}')
-                            print(f'Status: {status}')
-                            print(f'Funcionario: {funcionario}')
-                            print(f'Prioridade: {prioridade}')
+                            resposta = f'''Tarefa N{index+1}. {titulo}
+Descrição: {descricao}
+Criada em: {data}
+Status: {status}
+Atribuída ao funcionário: {funcionario}
+Prioridade: {prioridade} '''
+                            self.enviar_mensagem(resposta, chat_id)
                     else: 
-                        print('\nNão existem tarefas Canceladas!')
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+                        resposta = 'Não existem tarefas Canceladas!'
+                        self.enviar_mensagem(resposta, chat_id)
 
     #atualizando o status da tarefa
-    def atualizarStatus(self):
-        if self.verificarListaCheia():
-            self.exibir_tarefa()
+    def atualizarStatus(self, chat_id, update_id):
+        if self.verificarListaCheia(chat_id):
+            self.exibir_tarefa(chat_id, update_id)
             while True:               
                 try: 
-                    escolha = int(input('\nDigite qual tarefa deseja atualizar: '))-1
+                    resposta = 'Escolha qual tarefa deseja atualizar:'
+                    self.enviar_mensagem(resposta, chat_id)
+                    escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                    escolha = int(escolha)-1
                     if self.__listaTarefas[escolha]:
                         break
                 except:
-                    print('\nOpção invalida, selecione um valor valido!')
-            print(f'\nQual status deseja colocar na tarefa {escolha+1}')
-            statusesc = input('\n1. Completada \n2. Pendente \n3. Pendente com atraso \n4. Cancelada \n: ')
+                    resposta = 'Opção invalida, selecione um valor valido!'
+                    self.enviar_mensagem(resposta, chat_id)
 
-            if statusesc == '1':
+            resposta = f'''Qual status deseja colocar na tarefa {escolha+1}
+/Completada
+/Pendente
+/Atrasada
+/Cancelada'''
+            self.enviar_mensagem(resposta, chat_id)
+            statusesc, chat_id, update_id = self.receber_mensagem(update_id)
+            if statusesc == '/Completada':
                 status = 'Completada'
-            elif statusesc == '2':
+            elif statusesc == '/Pendente':
                 status = 'Pendente'
-            elif statusesc == '3':
+            elif statusesc == '/Atrasada':
                 status = 'Pendente com atraso'
-            elif statusesc == '4':
+            elif statusesc == '/Cancelada':
                 status = 'Cancelada'
 
             tarefa = self.__listaTarefas[escolha]
             tarefa.set_status(status)
-            print('\nStatus atualizado com sucesso!')
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+            resposta = 'Status atualizado com sucesso!'
+            self.enviar_mensagem(resposta, chat_id)
+
     
     #filtrando tarefas
-    def buscarTarefas(self):
-        if self.verificarListaCheia():
+    def buscarTarefas(self, chat_id, update_id):
+        if self.verificarListaCheia(chat_id):
             i = 0
-            busca = input('\nDigite a palavra chave ou titulo da tarefa: ')
+            resposta = 'Digite a palavra chave ou titulo da tarefa:'
+            self.enviar_mensagem(resposta, chat_id)
+            busca, chat_id, update_id = self.receber_mensagem(update_id)
+
             for index, tarefa in enumerate(self.__listaTarefas):
                 titulo = tarefa.get_titulo()
                 if busca in titulo.split():
-                    print(f'\nTarefa N{index+1}. {titulo}')
-                    print(f'Descrição: {tarefa.get_descricao()}')
-                    print(f'Criada em: {tarefa.get_data_criacao()}')
-                    print(f'Status: {tarefa.get_status()}')
-                    print(f'Funcionario: {tarefa.get_funcionario()}')
-                    print(f'Prioridade: {tarefa.get_prioridade()}')
+                    resposta = f'''Tarefa N{index+1}. {tarefa.get_titulo()}
+Descrição: {tarefa.get_descricao()}
+Criada em: {tarefa.get_data_criacao()}
+Status: {tarefa.get_status()}
+Atribuída ao funcionário: {tarefa.get_funcionario()}
+Prioridade: {tarefa.get_prioridade()} '''
+                    self.enviar_mensagem(resposta, chat_id)
+
                     i += 1
             if i == 0:
-                print('\nNenhuma tarefa encontrada!')
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+                resposta = 'Nenhuma tarefa encontrada!'
+                self.enviar_mensagem(resposta, chat_id)
+
 
     #editando tarefas existentes
-    def editarTarefas(self):
-        if self.verificarListaCheia():
-            self.exibir_tarefa()
+    def editarTarefas(self, chat_id, update_id):
+        if self.verificarListaCheia(chat_id):
+            self.exibir_tarefa(chat_id, update_id)
             while True: 
                 try:
-                    escolha = int(input('\nQual tarefa deseja editar: '))-1
+                    resposta = 'Qual tarefa deseja editar:'
+                    self.enviar_mensagem(resposta, chat_id)
+                    escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                    escolha = int(escolha)-1
                     tarefa = self.__listaTarefas[escolha]
                     break
                 except:
-                    print('\nOpção invalida, digite novamente: ')
-            while True:               
-                try:
-                    opcaoAtualizar = int(input('\n1. Atualizar o titulo \n2. Atualizar a descrição \n3. Atualizar a data \n4. Atualizar o status \n5. Atualizar o funcionario \n6. Atualizar prioridade \n7. Atualizar todas as informações \n: '))
-                    if opcaoAtualizar > 0 and opcaoAtualizar < 8:
-                        break
-                except:
-                    print('\nEscolha uma opção valida!')
-            if opcaoAtualizar == 1:
-                while True:
-                    titulo = input(f'\nDigite o titulo da tarefa: ')
-                    if titulo.strip():
-                        break
-                    else:
-                        print('\nDigite um titulo!')
-                tarefa.set_titulo(titulo)
-                print('\nTitulo atualizado com sucesso!')
+                    resposta = 'Opção invalida, digite novamente:'
+                    self.enviar_mensagem(resposta, chat_id)
 
-            elif opcaoAtualizar == 2:
-                descricao = input(f'\nDigite a descrição da tarefa: ')
-                tarefa.set_descricao(descricao)
-                print('\nDescrição atualizada com sucesso!')
+            while True:                              
+                resposta = '''O que deseja atualizar?
+/Titulo
+/Descricao
+/Data
+/Status
+/Funcionario
+/Prioridade
+/Todas as informacoes'''
+                self.enviar_mensagem(resposta, chat_id)
+                opcaoAtualizar, chat_id, update_id = self.receber_mensagem(update_id)
+                    
+                if opcaoAtualizar == '/Titulo':
+                    while True:
+                        resposta = 'Digite o titulo da tarefa:'
+                        self.enviar_mensagem(resposta, chat_id)
+                        titulo, chat_id, update_id = self.receber_mensagem(update_id)
 
-            elif opcaoAtualizar == 3:
-                data = datetime.now().strftime("%Y-%m-%d")
-                tarefa.set_data(data)
-                print('\nData atualizada com sucesso!')
+                        if titulo.strip():
+                            break
+                        else:
+                            resposta = 'Digite um titulo!'
+                            self.enviar_mensagem(resposta, chat_id)
 
-            elif opcaoAtualizar == 4:
-                print(f'\nQual status deseja colocar na tarefa {escolha+1}')
-                statusesc = input('\n1. Completada \n2. Pendente \n3. Pendente com atraso \n4. Cancelada \n: ')
+                    tarefa.set_titulo(titulo)
+                    resposta = 'Titulo atualizado com sucesso!'
+                    self.enviar_mensagem(resposta, chat_id)
+                    break
 
-                if statusesc == '1':
-                    status = 'Completada'
-                elif statusesc == '2':
-                    status = 'Pendente'
-                elif statusesc == '3':
-                    status = 'Pendente com atraso'
-                elif statusesc == '4':
-                    status = 'Cancelada'
-                tarefa.set_status(status)
-                print('\nStatus atualizado com sucesso!')
+                elif opcaoAtualizar == '/Descricao':
+                    resposta = 'Digite a descrição da tarefa:'
+                    self.enviar_mensagem(resposta, chat_id)
+                    descricao, chat_id, update_id = self.receber_mensagem(update_id)
 
-            elif opcaoAtualizar == 5:
-                funcionario = input(f'\nDigite o funcionario: ')
-                tarefa.set_funcionario(funcionario)
-                print('\nFuncionario atualizado com sucesso!')
+                    tarefa.set_descricao(descricao)
+                    resposta = 'Descrição atualizada com sucesso!'
+                    self.enviar_mensagem(resposta, chat_id)
+                    break
 
-            elif opcaoAtualizar == 6:
-                while True:
-                    escolha = input(f'\nEscolha a prioridade ta tarefa: \n1.Alta \n2.Média \n3.Baixa ')
-                    if escolha == '1':
-                        prioridade = 'Alta'
-                        break
-                    elif escolha == '2':
-                        prioridade = 'Media'  
-                        break              
-                    elif escolha == '3':
-                        prioridade = 'Baixa'
-                        break
-                    else:
-                        print('\nEscolha uma opção válida!')
-                tarefa.set_prioridade(prioridade)
-                print('\nPrioridade atualizada com sucesso!')
+                elif opcaoAtualizar == '/Data':
+                    data = datetime.now().strftime("%Y-%m-%d")
+                    tarefa.set_data(data)
+                    resposta = 'Data atualizada com sucesso!'
+                    self.enviar_mensagem(resposta, chat_id)
+                    break
 
-            elif opcaoAtualizar == 7:
-                while True:
-                    titulo = input(f'\nDigite o titulo da tarefa: ')
-                    if titulo.strip():
-                        break
-                    else:
-                        print('\nDigite um titulo!')
-                descricao = input(f'\nDigite a descrição da tarefa: ')
-                data = datetime.now().strftime("%Y-%m-%d")
-                print(f'\nQual status deseja colocar na tarefa {escolha+1}')
-                statusesc = input('\n1. Completada \n2. Pendente \n3. Pendente com atraso \n4. Cancelada \n: ')
+                elif opcaoAtualizar == '/Status':
+                    resposta = f'Qual status deseja colocar na tarefa {escolha+1}'
+                    self.enviar_mensagem(resposta, chat_id)
 
-                if statusesc == '1':
-                    status = 'Completada'
-                elif statusesc == '2':
-                    status = 'Pendente'
-                elif statusesc == '3':
-                    status = 'Pendente com atraso'
-                elif statusesc == '4':
-                    status = 'Cancelada'
+                    resposta = '''/Completada
+/Pendente
+/Atrasada
+/Cancelada'''
+                    self.enviar_mensagem(resposta, chat_id)
+                    statusesc, chat_id, update_id = self.receber_mensagem(update_id)
 
-                funcionario = input(f'\nDigite o funcionario: ')
+                    if statusesc == '/Completada':
+                        status = 'Completada'
+                    elif statusesc == '/Pendente':
+                        status = 'Pendente'
+                    elif statusesc == '/Atrasada':
+                        status = 'Pendente com atraso'
+                    elif statusesc == '/Cancelada':
+                        status = 'Cancelada'
 
-                while True:
-                    escolha = input(f'\nEscolha a prioridade ta tarefa: \n1.Alta \n2.Média \n3.Baixa ')
-                    if escolha == '1':
-                        prioridade = 'Alta'
-                        break
-                    elif escolha == '2':
-                        prioridade = 'Media'  
-                        break              
-                    elif escolha == '3':
-                        prioridade = 'Baixa'
-                        break
-                    else:
-                        print('\nEscolha uma opção válida!')
-                
-                tarefa.set_prioridade(prioridade)
-                tarefa.set_funcionario(funcionario)
-                tarefa.set_titulo(titulo)
-                tarefa.set_descricao(descricao)
-                tarefa.set_data(data)
-                tarefa.set_status(status)
-                print('\nDados atualizados com sucesso!')
+                    tarefa.set_status(status)
 
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+                    resposta = 'Status atualizado com sucesso!'
+                    self.enviar_mensagem(resposta, chat_id)
+                    break
+
+                elif opcaoAtualizar == '/Funcionario':
+                    resposta = 'Digite o funcionario:'
+                    self.enviar_mensagem(resposta, chat_id)
+                    funcionario, chat_id, update_id = self.receber_mensagem(update_id)
+                    tarefa.set_funcionario(funcionario)
+                    resposta = 'Funcionario atualizado com sucesso!'
+                    self.enviar_mensagem(resposta, chat_id)
+                    break
+
+                elif opcaoAtualizar == '/Prioridade':
+                    while True:
+                        resposta = '''Escolha a prioridade da tarefa:
+/Alta
+/Media
+/Baixa'''
+                        self.enviar_mensagem(resposta, chat_id)
+                        escolha, chat_id, update_id = self.receber_mensagem(update_id)
+
+                        if escolha == '/Alta':
+                            prioridade = 'Alta'
+                            break
+                        elif escolha == '/Media':
+                            prioridade = 'Media'  
+                            break              
+                        elif escolha == '/Baixa':
+                            prioridade = 'Baixa'
+                            break
+                        else:
+                            resposta = 'Escolha uma opção válida!'
+                            self.enviar_mensagem(resposta, chat_id)
+
+                    tarefa.set_prioridade(prioridade)
+                    resposta = 'Prioridade atualizada com sucesso!'
+                    self.enviar_mensagem(resposta, chat_id)
+                    break
+
+                elif opcaoAtualizar == '/Todas':
+                    while True:
+                        resposta = 'Digite o titulo da tarefa:'
+                        self.enviar_mensagem(resposta, chat_id)
+                        titulo, chat_id, update_id = self.receber_mensagem(update_id)
+
+                        if titulo.strip():
+                            break
+                        else:
+                            resposta = 'Digite um titulo!'
+                            self.enviar_mensagem(resposta, chat_id)
+
+                    resposta = 'Digite a descrição da tarefa:'
+                    self.enviar_mensagem(resposta, chat_id)
+                    descricao, chat_id, update_id = self.receber_mensagem(update_id)
+
+                    data = datetime.now().strftime("%Y-%m-%d")
+
+                    resposta = f'Qual status deseja colocar na tarefa {escolha+1}'
+                    self.enviar_mensagem(resposta, chat_id)
+
+                    resposta = '''/Completada
+/Pendente
+/Atrasada
+/Cancelada'''
+                    self.enviar_mensagem(resposta, chat_id)
+                    statusesc, chat_id, update_id = self.receber_mensagem(update_id)
+
+                    if statusesc == '/Completada':
+                        status = 'Completada'
+                    elif statusesc == '/Pendente':
+                        status = 'Pendente'
+                    elif statusesc == '/Atrasada':
+                        status = 'Pendente com atraso'
+                    elif statusesc == '/Cancelada':
+                        status = 'Cancelada'
+
+
+                    resposta = 'Digite o funcionario:'
+                    self.enviar_mensagem(resposta, chat_id)
+                    funcionario, chat_id, update_id = self.receber_mensagem(update_id)
+
+                    while True:
+                        resposta = '''Escolha a prioridade da tarefa:
+/Alta
+/Media
+/Baixa'''
+                        self.enviar_mensagem(resposta, chat_id)
+                        escolha, chat_id, update_id = self.receber_mensagem(update_id)
+
+                        if escolha == '/Alta':
+                            prioridade = 'Alta'
+                            break
+                        elif escolha == '/Media':
+                            prioridade = 'Media'  
+                            break              
+                        elif escolha == '/Baixa':
+                            prioridade = 'Baixa'
+                            break
+                        else:
+                            resposta = 'Escolha uma opção válida!'
+                            self.enviar_mensagem(resposta, chat_id)
+                    
+                    tarefa.set_prioridade(prioridade)
+                    tarefa.set_funcionario(funcionario)
+                    tarefa.set_titulo(titulo)
+                    tarefa.set_descricao(descricao)
+                    tarefa.set_data(data)
+                    tarefa.set_status(status)
+                    resposta = 'Dados atualizados com sucesso!'
+                    self.enviar_mensagem(resposta, chat_id)
+                    break
+
 
     #excluindo tarefas
-    def excluirTarefa(self):
-        if self.verificarListaCheia():
-            self.exibir_tarefa()
+    def excluirTarefa(self, chat_id, update_id):
+        if self.verificarListaCheia(chat_id):
+            self.exibir_tarefa(chat_id, update_id)
         while True: 
             try:
-                escolha = int(input('\nQual tarefa deseja excluir: '))-1
+                resposta = 'Qual tarefa deseja excluir:'
+                self.enviar_mensagem(resposta, chat_id)
+                escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                escolha = int(escolha)-1
                 tarefa = self.__listaTarefas[escolha]
                 break
             except:
-                print('\nNão existe essa tarefa na lista, digite novamente: ')
+                resposta = 'Não existe essa tarefa na lista, digite novamente:'
+                self.enviar_mensagem(resposta, chat_id)
+
         self.__listaTarefas.remove(tarefa)
-        print('\nTarefa excluida com sucesso!')
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+        resposta = 'Tarefa excluida com sucesso!'
+        self.enviar_mensagem(resposta, chat_id)
 
-    def alterar_prioridade(self):
+    def alterar_prioridade(self, chat_id, update_id):
 
-        if self.verificarListaCheia():
-            self.exibir_tarefa()
+        if self.verificarListaCheia(chat_id):
+            self.exibir_tarefa(chat_id, update_id)
             while True: 
                 try:
-                    escolha = int(input('\nQual tarefa deseja editar: '))-1
+                    resposta = 'Qual tarefa deseja editar:'
+                    self.enviar_mensagem(resposta, chat_id)
+                    escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                    escolha = int(escolha)-1
                     tarefa = self.__listaTarefas[escolha]
                     break
                 except:
-                    print('\nOpção invalida, digite novamente: ')
+                    resposta = 'Opção invalida, digite novamente:'
+                    self.enviar_mensagem(resposta, chat_id)
+
             while True:
-                escolha = input(f'\nEscolha a prioridade ta tarefa: \n1.Alta \n2.Média \n3.Baixa ')
-                if escolha == '1':
+                resposta = '''Escolha a prioridade ta tarefa:
+/Alta
+/Media
+/Baixa'''
+                self.enviar_mensagem(resposta, chat_id)
+                escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                if escolha == '/Alta':
                     prioridade = 'Alta'
                     break
-                elif escolha == '2':
+                elif escolha == '/Media':
                     prioridade = 'Media'  
                     break              
-                elif escolha == '3':
+                elif escolha == '/Baixa':
                     prioridade = 'Baixa'
                     break
                 else:
-                    print('\nEscolha uma opção válida!')
-            tarefa.set_prioridade(prioridade)
-            print('\nPrioridade atualizada com sucesso!')
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+                    resposta = 'Escolha uma opção válida!'
+                    self.enviar_mensagem(resposta, chat_id)
 
-    def atribuir_funcionario(self):
-        if self.verificarListaCheia():
-            self.exibir_tarefa()
+            tarefa.set_prioridade(prioridade)
+            resposta = 'Prioridade atualizada com sucesso!'
+            self.enviar_mensagem(resposta, chat_id)
+
+
+    def atribuir_funcionario(self, chat_id, update_id):
+        if self.verificarListaCheia(chat_id):
+            self.exibir_tarefa(chat_id, update_id)
             while True: 
                 try:
-                    escolha = int(input('\nQual tarefa deseja editar: '))-1
+                    resposta = 'Qual tarefa deseja editar:'
+                    self.enviar_mensagem(resposta, chat_id)
+                    escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                    escolha = int(escolha)-1
                     tarefa = self.__listaTarefas[escolha]
                     break
                 except:
-                    print('\nOpção invalida, digite novamente: ')
+                    resposta = 'Opção invalida, digite novamente:'
+                    self.enviar_mensagem(resposta, chat_id)
+
             while True:
-                funcionario = input(f'\nDigite o nome do funcionario: ')
+                resposta = 'Digite o nome do funcionario:'
+                self.enviar_mensagem(resposta, chat_id)
+                funcionario, chat_id, update_id = self.receber_mensagem(update_id)
                 if not self.user_validation(funcionario):
                     break
                 else:
-                    print('\nFuncionario nao encontrado!')
+                    resposta = 'Funcionario nao encontrado!'
+                    self.enviar_mensagem(resposta, chat_id)
+
             tarefa.set_funcionario(funcionario)
-            print('\nFuncionario atribuido com sucesso!')
-        print('\n------------------------------------------------------------------')
-        input('\nPressione ENTER para continuar...\n')
+            resposta = 'Funcionario atribuido com sucesso!'
+            self.enviar_mensagem(resposta, chat_id)
 
 
 
@@ -767,7 +917,6 @@ Digite seu nome de usuário:
 /Sair'''
             self.enviar_mensagem(resposta, chat_id)
             choice, chat_id, update_id = self.receber_mensagem(update_id)
-            print(choice)
             if choice == '/Funcionarios':
                 self.register_employee(chat_id, update_id)
 
@@ -787,21 +936,21 @@ Digite seu nome de usuário:
                     choice, chat_id, update_id = self.receber_mensagem(update_id)
                     
                     if choice == '/Adicionar':
-                        self.adicionar_tarefa()
+                        self.adicionar_tarefa(chat_id, update_id)
                     elif choice == '/Editar':
-                        self.editarTarefas()
+                        self.editarTarefas(chat_id, update_id)
                     elif choice == '/Visualizar':
-                        self.exibir_tarefa()
+                        self.exibir_tarefa(chat_id, update_id)
                     elif choice == '/Excluir':
-                        self.excluirTarefa()
+                        self.excluirTarefa(chat_id, update_id)
                     elif choice == '/Alterar':
-                        self.alterar_prioridade()
+                        self.alterar_prioridade(chat_id, update_id)
                     elif choice == '/Filtrar':
-                        self.tarefas_status()
+                        self.tarefas_status(chat_id, update_id)
                     elif choice == '/Buscar':
-                        self.buscarTarefas()
+                        self.buscarTarefas(chat_id, update_id)
                     elif choice == '/Atribuir':
-                        self.atribuir_funcionario()
+                        self.atribuir_funcionario(chat_id, update_id)
                     elif choice == '/Sair':
                         break
                     else:
