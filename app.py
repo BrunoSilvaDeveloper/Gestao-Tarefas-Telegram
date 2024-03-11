@@ -35,6 +35,45 @@ class TelegramBot:
     link_de_envio = f'{self.url_base}sendMessage?chat_id={chat_id}&text={resposta}'
     requests.get(link_de_envio)
 
+class Tarefa:
+    #criando o objeto tarefa com atributos privados
+    def __init__(self, titulo, descricao, dataCriacao, status):
+        self.__titulo = titulo
+        self.__descricao = descricao
+        self.__dataCriacao = dataCriacao
+        self.__status = status
+
+    #retornando o titulo da tarefa
+    def get_titulo(self):
+        return self.__titulo
+    
+    #retornando a descricao da tarefa
+    def get_descricao(self):
+        return self.__descricao
+    
+    #retornando a data da tarefa
+    def get_data_criacao(self):
+        return self.__dataCriacao
+    
+    #retornando o status da tarefa
+    def get_status(self):
+        return self.__status
+
+    #atualizando o titulo
+    def set_titulo(self, titulo):
+        self.__titulo = titulo
+
+    #atualizando a descricao
+    def set_descricao(self, descricao):
+        self.__descricao = descricao
+
+    #atualizando a data
+    def set_data(self, data):
+        self.__dataCriacao = data
+
+    #atualizando o status
+    def set_status(self, status):
+        self.__status = status 
 
 class User():
     def __init__(self, name, password, office, logado):
@@ -161,15 +200,15 @@ class Manager():
 
         while True:
             resposta = '''Qual o cargo operacional do funcionário? 
-1.Administrador 
-2.Funcionário'''
+/Administrador
+/Funcionario'''
             self.enviar_mensagem(resposta, chat_id)
             choice, chat_id, update_id = self.receber_mensagem(update_id)
-            if choice == '1':
+            if choice == '/Administrador':
                 office = 'administrator'
                 break
             
-            elif choice == '2':
+            elif choice == '/Funcionario':
                 office = 'employee'
                 break
             
@@ -220,27 +259,27 @@ class Manager():
           
     def exibir_menu(self, chat_id, update_id):
         while True:
-            resposta = 'Menu Lista de Tarefas \nO que você deseja fazer? \n1.Login \n2.Sair'
+            resposta = 'Menu Lista de Tarefas \nO que você deseja fazer? \n/Login \n/Sair'
             self.enviar_mensagem(resposta, chat_id)
             choice, chat_id, update_id = self.receber_mensagem(update_id)
-            if choice == '1':
+            if choice == '/Login':
                 resposta = '''Tela de Login
 Digite seu nome de usuário: 
                 ''' 
                 self.enviar_mensagem(resposta, chat_id)
                 name, chat_id, update_id = self.receber_mensagem(update_id)
-                office = self.login(name, chat_id, update_id)
+                office, chat_id, update_id = self.login(name, chat_id, update_id)
                 if office:
                     return office, chat_id, update_id
                 else:
-                    return 'Error'
+                    return 'Error', chat_id, update_id
                 
-            elif choice == '2':
+            elif choice == '/Sair':
                 resposta = 'Finalizando programa!'
                 self.enviar_mensagem(resposta, chat_id)
-                return False
+                return False, chat_id, update_id
             else:
-                resposta = 'Selecione uma opção válida!'
+                resposta = 'Selecione uma opção válida, clique na opção escolhida!'
                 self.enviar_mensagem(resposta, chat_id)
 
     def login(self, name, chat_id, update_id):
@@ -256,17 +295,18 @@ Digite seu nome de usuário:
                         user.set_logado(True)
                         resposta = 'Login realizado com sucesso!'
                         self.enviar_mensagem(resposta, chat_id)
-                        return user.get_office()
+                        office = user.get_office()
+                        return office, chat_id, update_id
                     else:
                         resposta = 'Sua senha esta incorreta!'
                         self.enviar_mensagem(resposta, chat_id)
                         tentativas -= 1
                 resposta = 'Tentativas esgotadas. Saindo...'
                 self.enviar_mensagem(resposta, chat_id)
-                return False
+                return False, chat_id, update_id
         resposta = 'Usuário não encontrado!'
         self.enviar_mensagem(resposta, chat_id)
-        return False
+        return False, chat_id, update_id
 
     def exibir_menu_adm(self, chat_id, update_id):
 
@@ -275,22 +315,17 @@ Digite seu nome de usuário:
         while True:
             resposta = '''O que você deseja fazer? 
 
-1.Funcionários 
-2.Tarefas 
-3.Sair'''
+/Funcionarios 
+/Tarefas 
+/Sair'''
             self.enviar_mensagem(resposta, chat_id)
             choice, chat_id, update_id = self.receber_mensagem(update_id)
-            if choice == '1':
-                if choice == '1': self.register_employee(chat_id, update_id)
-                elif choice == '2': pass
-                elif choice == '3': pass
-                elif choice =='4': pass
-                else: 
-                    resposta = 'Digite uma opção válida!'
-                    self.enviar_mensagem(resposta, chat_id)
+            print(choice)
+            if choice == '/Funcionarios':
+                self.register_employee(chat_id, update_id)
 
-            elif choice == '2':
-                resposta = ''''O que você deseja fazer? 
+            elif choice == '/Tarefas':
+                resposta = '''O que você deseja fazer? 
 1. Adicionar Tarefas 
 2.Editar Tarefas 
 3.Visualizar Tarefas 
@@ -301,10 +336,12 @@ Digite seu nome de usuário:
                 self.enviar_mensagem(resposta, chat_id)
                 choice, chat_id, update_id = self.receber_mensagem(update_id)
                 #continuar aqui
-                return False
+                return False, chat_id, update_id
 
-            elif choice == '3':
-                return False
+            elif choice == '/Sair':
+                resposta = 'Saindo...'
+                self.enviar_mensagem(resposta, chat_id)
+                return False, chat_id, update_id
             else:
                 resposta = 'Digite uma opção válida!'
                 self.enviar_mensagem(resposta, chat_id)
@@ -314,19 +351,19 @@ Digite seu nome de usuário:
         self.enviar_mensagem(resposta, chat_id)
         while True:
             resposta = '''O que você deseja fazer? 
-1.Visualizar tarefas pendentes 
-2.Marcar tarefas como concluídas 
-3.Sair'''
+/Visualizar tarefas pendentes 
+/Marcar tarefas como concluídas 
+/Sair'''
             self.enviar_mensagem(resposta, chat_id)
             choice, chat_id, update_id = self.receber_mensagem(update_id)
-            if choice == '1':
+            if choice == '/Visualizar':
                 pass
 
-            elif choice == '2':
+            elif choice == '/Marcar':
                 pass
 
-            elif choice == '3':
-                return False
+            elif choice == '/Sair':
+                return False, chat_id, update_id
             else:
                 resposta = 'Digite uma opção válida!'
                 self.enviar_mensagem(resposta, chat_id)
@@ -339,21 +376,22 @@ Digite seu nome de usuário:
             mensagem, chat_id, update_id = bot.Iniciar(update_id)
             office, chat_id, update_id = self.exibir_menu(chat_id, update_id)
             if office == 'administrator' or office == 'employee':
-                while True:
-                    if office == 'administrator':
-                        office = self.exibir_menu_adm(chat_id, update_id) 
+                if office == 'administrator':
+                    while True:              
+                        office, chat_id, update_id = self.exibir_menu_adm(chat_id, update_id) 
                         if office:
                             pass
                         else: break
                         
-                    elif office == 'employee':
-                        office = self.exibir_menu_adm(chat_id, update_id) 
+                elif office == 'employee':
+                    while True:
+                        office, chat_id, update_id = self.exibir_menu_employee(chat_id, update_id) 
                         if office:
                             pass
                         else: break
                         
-                    else: 
-                        break
+                else: 
+                    break
             elif office == 'Error': pass
             else: break
 
