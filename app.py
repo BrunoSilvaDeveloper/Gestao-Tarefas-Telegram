@@ -398,6 +398,47 @@ Atribuída ao funcionário: {tarefa.get_funcionario()}
 Prioridade: {tarefa.get_prioridade()} '''
                 self.enviar_mensagem(resposta, chat_id)
 
+  #filtrando a lista de tarefas pelo status 
+    def tarefas_funcionario(self, chat_id, update_id, nome):
+        #verificando se existe algum valor na lista
+        if self.verificarListaCheiaFuncionarios(chat_id):
+            while True:
+                try:
+                    if nome == None:
+                        #perguntando qual o filtro o usuario deseja utilizar
+                        resposta = '''Digite o nome do funcionario: '''
+                        self.enviar_mensagem(resposta, chat_id)
+                        nome, chat_id, update_id = self.receber_mensagem(update_id)
+                        break
+                    elif len(nome.strip())>0:
+                        break
+                        
+                except:
+                    resposta = 'Usuário não encontrado! Digite novamente.'
+                    self.enviar_mensagem(resposta, chat_id)
+
+            resposta = f'''Tarefas de {nome} '''
+            self.enviar_mensagem(resposta, chat_id)
+    
+            #exibindo a lista
+            for index, tarefaStatus in enumerate(self.__listaTarefas):
+                titulo = tarefaStatus.get_titulo()
+                descricao = tarefaStatus.get_descricao()
+                data = tarefaStatus.get_data_criacao()
+                status = tarefaStatus.get_status()
+                funcionario = tarefaStatus.get_funcionario()
+                prioridade = tarefaStatus.get_prioridade()
+                
+                if nome == funcionario:
+                    resposta = f'''Tarefa /{index+1}. {titulo}
+Descrição: {descricao}
+Criada em: {data}
+Status: {status}
+Atribuída ao funcionário: {funcionario}
+Prioridade: {prioridade} '''
+                    self.enviar_mensagem(resposta, chat_id)
+
+
     #filtrando a lista de tarefas pelo status 
     def tarefas_status(self, chat_id, update_id):
         #verificando se existe algum valor na lista
@@ -425,7 +466,7 @@ Prioridade: {tarefa.get_prioridade()} '''
                 funcionario = tarefaStatus.get_funcionario()
                 prioridade = tarefaStatus.get_prioridade()
                 
-                if tipoStatus == 1:
+                if tipoStatus == '/Completada':
                     # verificando se existem tarefas completadas na lista
                     if self.verificarTarefasCompletadas(): 
                         #exibindo as tarefas que estao completadas
@@ -441,7 +482,7 @@ Prioridade: {prioridade} '''
                         resposta = 'Não existem tarefas Completadas!'
                         self.enviar_mensagem(resposta, chat_id)
 
-                elif tipoStatus == 2:
+                elif tipoStatus == '/Pendente':
                     # verificando se existem tarefas pendentes na lista
                     if self.verificarTarefasPendentes():
                         #exibindo as tarefas que estao pendentes
@@ -457,7 +498,7 @@ Prioridade: {prioridade} '''
                         resposta = 'Não existem tarefas Pendentes!'
                         self.enviar_mensagem(resposta, chat_id)
 
-                elif tipoStatus == 3:
+                elif tipoStatus == '/Atrasada':
                     # verificando se existem tarefas pendentes na lista
                     if self.verificarTarefasPendentesAtraso():
                         #exibindo as tarefas que estao pendentes com atraso
@@ -473,7 +514,7 @@ Prioridade: {prioridade} '''
                         resposta = 'Não existem tarefas Atrasadas!'
                         self.enviar_mensagem(resposta, chat_id)
 
-                elif tipoStatus == 4:
+                elif tipoStatus == '/Cancelada':
                     # verificando se existem tarefas canceladas na lista
                     if self.verificarTarefasCanceladas():
                         #exibindo as tarefas que estao canceladas
@@ -490,15 +531,15 @@ Prioridade: {prioridade} '''
                         self.enviar_mensagem(resposta, chat_id)
 
     #atualizando o status da tarefa
-    def atualizarStatus(self, chat_id, update_id):
+    def atualizarStatus(self, chat_id, update_id, nome):
         if self.verificarListaCheia(chat_id):
-            self.exibir_tarefa(chat_id, update_id)
+            self.tarefas_funcionario(chat_id, update_id, nome)
             while True:               
                 try: 
                     resposta = 'Escolha qual tarefa deseja atualizar:'
                     self.enviar_mensagem(resposta, chat_id)
                     escolha, chat_id, update_id = self.receber_mensagem(update_id)
-                    escolha = int(escolha)-1
+                    escolha = int(escolha.replace('/', ''))-1
                     if self.__listaTarefas[escolha]:
                         break
                 except:
@@ -561,7 +602,7 @@ Prioridade: {tarefa.get_prioridade()} '''
                     resposta = 'Qual tarefa deseja editar:'
                     self.enviar_mensagem(resposta, chat_id)
                     escolha, chat_id, update_id = self.receber_mensagem(update_id)
-                    escolha = int(escolha)-1
+                    escolha = int(escolha.replace('/', ''))-1
                     tarefa = self.__listaTarefas[escolha]
                     break
                 except:
@@ -759,7 +800,7 @@ Prioridade: {tarefa.get_prioridade()} '''
                 resposta = 'Qual tarefa deseja excluir:'
                 self.enviar_mensagem(resposta, chat_id)
                 escolha, chat_id, update_id = self.receber_mensagem(update_id)
-                escolha = int(escolha)-1
+                escolha = int(escolha.replace('/', ''))-1
                 tarefa = self.__listaTarefas[escolha]
                 break
             except:
@@ -779,7 +820,7 @@ Prioridade: {tarefa.get_prioridade()} '''
                     resposta = 'Qual tarefa deseja editar:'
                     self.enviar_mensagem(resposta, chat_id)
                     escolha, chat_id, update_id = self.receber_mensagem(update_id)
-                    escolha = int(escolha)-1
+                    escolha = int(escolha.replace('/', ''))-1
                     tarefa = self.__listaTarefas[escolha]
                     break
                 except:
@@ -810,7 +851,6 @@ Prioridade: {tarefa.get_prioridade()} '''
             resposta = 'Prioridade atualizada com sucesso!'
             self.enviar_mensagem(resposta, chat_id)
 
-
     def atribuir_funcionario(self, chat_id, update_id):
         if self.verificarListaCheia(chat_id):
             self.exibir_tarefa(chat_id, update_id)
@@ -819,7 +859,7 @@ Prioridade: {tarefa.get_prioridade()} '''
                     resposta = 'Qual tarefa deseja editar:'
                     self.enviar_mensagem(resposta, chat_id)
                     escolha, chat_id, update_id = self.receber_mensagem(update_id)
-                    escolha = int(escolha)-1
+                    escolha = int(escolha.replace('/', ''))-1
                     tarefa = self.__listaTarefas[escolha]
                     break
                 except:
@@ -841,10 +881,75 @@ Prioridade: {tarefa.get_prioridade()} '''
             self.enviar_mensagem(resposta, chat_id)
 
 
-
-
-
 # Funcoes tarefas -------------------------------------------------------------
+            
+# Funcoes funcionarios ----------------------------------
+
+    def verificarListaCheiaFuncionarios(self, chat_id):
+        if len(self.__usuarios):
+            return True
+        else: 
+            resposta = 'Não existem usuarios na lista. Adicione novos para poder visualizar!'
+            self.enviar_mensagem(resposta, chat_id)
+        
+
+    def exibir_funcionario(self, chat_id, update_id):
+    #verificando se existem tarefas na lista
+        if self.verificarListaCheiaFuncionarios(chat_id):
+            resposta = 'Lista de Funcionarios'
+            self.enviar_mensagem(resposta, chat_id)
+
+            for index, user in enumerate(self.__usuarios):
+
+                resposta = f'''User /{index+1}.
+Nome: {user.get_name()}
+Função: {user.get_office()}
+'''
+                self.enviar_mensagem(resposta, chat_id)
+
+      #excluindo tarefas
+   
+   
+    def excluirFuncionario(self, chat_id, update_id):
+        if self.verificarListaCheiaFuncionarios(chat_id):
+            self.exibir_funcionario(chat_id, update_id)
+        while True: 
+            try:
+                resposta = 'Qual funcionario deseja excluir:'
+                self.enviar_mensagem(resposta, chat_id)
+                escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                escolha = int(escolha.replace('/', ''))-1
+                user = self.__usuarios[escolha]
+                break
+            except:
+                resposta = 'Não existe esse funcionario na lista, digite novamente:'
+                self.enviar_mensagem(resposta, chat_id)
+
+        self.__usuarios.remove(user)
+        resposta = 'Funcionario excluido com sucesso!'
+        self.enviar_mensagem(resposta, chat_id)
+
+ 
+    def buscarFuncionarios(self, chat_id, update_id):
+        if self.verificarListaCheiaFuncionarios(chat_id):
+            resposta = 'Digite o nome do funcionario:'
+            self.enviar_mensagem(resposta, chat_id)
+            nome, chat_id, update_id = self.receber_mensagem(update_id)
+            for index, user in enumerate(self.__usuarios):
+                if nome == user:
+                    resposta = f'''User /{index+1}.
+Nome: {user.get_name()}
+Função: {user.get_office()}
+'''
+                self.enviar_mensagem(resposta, chat_id)
+            else:
+                resposta = 'Funcionario não encontrado!'
+                self.enviar_mensagem(resposta, chat_id)
+
+
+         
+# Funcoes funcionarios _____________________--------------------------------
+
    
     def receber_mensagem(self, update_id):
         bot = TelegramBot()
@@ -918,7 +1023,25 @@ Digite seu nome de usuário:
             self.enviar_mensagem(resposta, chat_id)
             choice, chat_id, update_id = self.receber_mensagem(update_id)
             if choice == '/Funcionarios':
-                self.register_employee(chat_id, update_id)
+                resposta = '''O que você deseja fazer? 
+
+/Registrar funcionarios 
+/Exibir funcionarios 
+/Excluir funcionarios
+/Sair'''
+                self.enviar_mensagem(resposta, chat_id)
+                escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                if escolha == '/Registrar':
+                    self.register_employee(chat_id, update_id)
+                elif escolha == '/Exibir':
+                    self.exibir_funcionario(chat_id, update_id)
+                elif escolha == '/Excluir':
+                    self.excluirFuncionario(chat_id, update_id)
+                elif escolha == '/Sair':
+                    pass
+                else:
+                    resposta = 'Escolha um opção válida!'
+                    self.enviar_mensagem(resposta, chat_id)
 
             elif choice == '/Tarefas':
                 while True:
@@ -946,7 +1069,16 @@ Digite seu nome de usuário:
                     elif choice == '/Alterar':
                         self.alterar_prioridade(chat_id, update_id)
                     elif choice == '/Filtrar':
-                        self.tarefas_status(chat_id, update_id)
+                        resposta = '''Você deseja filtrar por: \n/Status \n/Funcionario'''
+                        self.enviar_mensagem(resposta, chat_id)
+                        escolha, chat_id, update_id = self.receber_mensagem(update_id)
+                        if escolha == '/Status':
+                            self.tarefas_status(chat_id, update_id)
+                        elif escolha == '/Funcionario':
+                            self.tarefas_funcionario(chat_id, update_id, nome=None)
+                        else:
+                            resposta = '''Opção inválida!'''
+                            self.enviar_mensagem(resposta, chat_id)
                     elif choice == '/Buscar':
                         self.buscarTarefas(chat_id, update_id)
                     elif choice == '/Atribuir':
@@ -956,17 +1088,19 @@ Digite seu nome de usuário:
                     else:
                         resposta = 'Escolha uma opção válida'
                         self.enviar_mensagem(resposta, chat_id)
-                        choice, chat_id, update_id = self.receber_mensagem(update_id)
 
             elif choice == '/Sair':
                 resposta = 'Saindo...'
                 self.enviar_mensagem(resposta, chat_id)
+                for users in self.__usuarios:
+                    if users.get_logado() == True:
+                        users.set_logado(False)
                 return False, chat_id, update_id
             else:
                 resposta = 'Digite uma opção válida!'
                 self.enviar_mensagem(resposta, chat_id)
 
-    def exibir_menu_employee(self):
+    def exibir_menu_employee(self, chat_id, update_id):
         resposta = 'Menu de Funcionário!'
         self.enviar_mensagem(resposta, chat_id)
         while True:
@@ -977,12 +1111,23 @@ Digite seu nome de usuário:
             self.enviar_mensagem(resposta, chat_id)
             choice, chat_id, update_id = self.receber_mensagem(update_id)
             if choice == '/Visualizar':
-                pass
+                for users in self.__usuarios:
+                    if users.get_logado():
+                        nome = users.get_name()
+                        self.tarefas_funcionario(chat_id, update_id, nome)
 
             elif choice == '/Marcar':
-                pass
+                for users in self.__usuarios:
+                    if users.get_logado():
+                        nome = users.get_name()
+                        self.atualizarStatus(chat_id, update_id, nome)
 
             elif choice == '/Sair':
+                resposta = 'Saindo...'
+                self.enviar_mensagem(resposta, chat_id)
+                for users in self.__usuarios:
+                    if users.get_logado() == True:
+                        users.set_logado(False)
                 return False, chat_id, update_id
             else:
                 resposta = 'Digite uma opção válida!'
@@ -1018,9 +1163,5 @@ Digite seu nome de usuário:
 
 init = Manager()
 init.looping_execucao()
-
-
-
-
 
 
